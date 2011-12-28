@@ -20,6 +20,5 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency "nullobject"
   s.add_development_dependency "rspec"
-  s.add_development_dependency "ruby-debug"
   s.add_development_dependency "em-spec"
 end

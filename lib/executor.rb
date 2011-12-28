@@ -20,7 +20,7 @@ module Executor
 
   class Executor
     DEFAULTS = {
-      :redirect_stderr => false,
+      :redirect_stderr => true,
       :raise_exceptions => true,
       :async => false,
       :logger => Null::Object.instance
@@ -29,14 +29,13 @@ module Executor
       attr_reader :config
 
       def configure(config={})
-        @config||=Executor::DEFAULTS.merge(config)
+        @config = (@config || Executor::DEFAULTS).merge(config)
       end 
 
       def command(cmd, options={}, &block)
         options = configure.dup.merge(options)
         options[:logger].info "COMMAND: #{cmd}"
         options[:async] ||= block_given?
-
         raise ArgumentError.new("No block given for async command") if (options[:async] && !block_given?)
 
         if options[:async]
@@ -75,8 +74,7 @@ module Executor
           end
       end
 
-      def return_or_raise(cmd, success, output, options = nil)
-        options ||= @config || configure
+      def return_or_raise(cmd, success, output, options)
         options[:logger].info "RETURN(#{cmd}): #{output}"
         exception =  CommandFailure.new(%Q{Command "#{cmd}" failed with #{output}}) 
         return output if success

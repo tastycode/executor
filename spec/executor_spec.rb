@@ -1,6 +1,7 @@
-require 'lib/executor.rb'
+require 'spec_helper'
+require 'executor'
 require 'logger'
-require 'ruby-debug'
+
 describe Executor do
   let (:failing_cmd) { "expr 5 / 0" }
     context "exceptions" do
@@ -15,21 +16,20 @@ describe Executor do
       let(:cmd) { "echo test"}
       let(:output) { "test output" }
 
+      let(:options) { {:raise_exceptions => true, :logger=>stub(:info=>nil)} }
       it "returns output if successful" do
         output = "test"
-        Executor.return_or_raise("echo test",true, output).should == output
+        Executor.return_or_raise("echo test",true, output, options).should == output
       end
 
       it "raises exceptions when configured" do
-        options = {:raise_exceptions => true, :logger=>stub(:info=>nil)}
         expect {
           Executor.return_or_raise(cmd, false, output, options)
         }.to raise_exception(Executor::CommandFailure, /#{cmd}.*#{output}/)
       end
 
      it "returns an exception if async" do
-        Executor.configure(:async => true)
-        Executor.return_or_raise(cmd, false, output).should be_an(Executor::CommandFailure)
+        Executor.return_or_raise(cmd, false, output, options.merge(:async=>true)).should be_an(Executor::CommandFailure)
      end 
     end
     context ".command" do
